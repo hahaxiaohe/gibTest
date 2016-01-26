@@ -9,7 +9,7 @@ import android.app.Application;
 public class StringUtils {
 
 	/**
-	 * ½«inputstream×ª³ÉString
+	 * å°†inputstreamè½¬æˆString
 	 * @return
 	 * @throws IOException 
 	 */
@@ -27,3 +27,4 @@ public class StringUtils {
 	
 
 }
+

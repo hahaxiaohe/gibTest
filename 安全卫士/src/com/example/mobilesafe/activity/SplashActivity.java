@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -52,6 +53,8 @@ public class SplashActivity extends Activity {
 	protected static final int CODE_NET_ERROR = 4;
 	protected static final int CODE_JSON_ERROR = 5;
 	private static final int INSTALLCODE = 6;
+	private static final String AUTO_UPDATE = "auto_update";
+	private static final int NO_CHECK_UPDATE = 7;
 	private TextView tv_versionName;
 	private String versionName;
 	private int versionCode;
@@ -65,14 +68,15 @@ public class SplashActivity extends Activity {
 			case CODE_URL_ERROR:
 			case CODE_NET_ERROR:
 			case CODE_JSON_ERROR:
-				AlertUser("»ñÈ¡ĞÂ°æ±¾³ö´í!");
+				AlertUser("è·å–æ–°ç‰ˆæœ¬å‡ºé”™!");
 				goHome();
 				break;
 			case NO_NEW_VERSION:
-				AlertUser("Ä¿Ç°Ê¹ÓÃµÄÊÇ×îĞÂ°æ±¾!");
+				AlertUser("ç›®å‰ä½¿ç”¨çš„æ˜¯æœ€æ–°ç‰ˆæœ¬!");
+				goHome();
+			case NO_CHECK_UPDATE:
 				goHome();
 				break;
-
 			default:
 				break;
 			}
@@ -86,8 +90,21 @@ public class SplashActivity extends Activity {
 		setContentView(R.layout.activity_splash);
 		initView();
 		String versionName = getVersionName();
-		tv_versionName.setText("°æ±¾ºÅ: " + versionName);
-		checkVerson();
+		tv_versionName.setText("ç‰ˆæœ¬å·: " + versionName);
+		//è·å–sharePreferncesæ–‡ä»¶
+		SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
+		//æŸ¥çœ‹ç”¨æˆ·ä¸Šä¸€æ¬¡çš„é€‰æ‹©,æ˜¯å¦é€‰æ‹©è‡ªåŠ¨æ›´æ–°
+		boolean lastOpt = sp.getBoolean(AUTO_UPDATE, true);
+		//å¦‚æœé€‰æ‹©è‡ªåŠ¨æ›´æ–° åˆ™è”ç½‘æŸ¥æ‰¾æ˜¯å¦æœ‰æ–°ç‰ˆæœ¬
+		if(lastOpt)
+		{
+			checkVerson();
+		}
+		//å¦‚æœé€‰æ‹©ä¸è‡ªåŠ¨æ›´æ–°, åˆ™å»¶æ—¶2ç§’å‘é€æ¶ˆæ¯,è·³è½¬ä¸»é¡µé¢
+		else
+		{
+			mHandler.sendEmptyMessageDelayed(NO_CHECK_UPDATE, 2000);
+		}
 	}
 
 	@Override
@@ -98,14 +115,14 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * ¼ì²é·şÎñÆ÷ÊÇ·ñ´æÔÚĞÂ°æ±¾,ÌáÊ¾ÓÃ»§¸üĞÂhttp://10.0.2.2:8080/360/update.json
+	 * æ£€æŸ¥æœåŠ¡å™¨æ˜¯å¦å­˜åœ¨æ–°ç‰ˆæœ¬,æç¤ºç”¨æˆ·æ›´æ–°http://10.0.2.2:8080/360/update.json
 	 * 
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 */
 	private void checkVerson() {
 		final long startTime = System.currentTimeMillis();
-		// Æô¶¯×ÓÏß³ÌÒì²½¼ÓÔØÊı¾İ
+		// å¯åŠ¨å­çº¿ç¨‹å¼‚æ­¥åŠ è½½æ•°æ®
 		new Thread() {
 
 			@Override
@@ -113,54 +130,54 @@ public class SplashActivity extends Activity {
 				Message msg = Message.obtain();
 				HttpURLConnection conn = null;
 				try {
-					// ±¾»úµØÖ·ÓÃlocalhost, µ«ÊÇÈç¹ûÓÃÄ£ÄâÆ÷¼ÓÔØ±¾»úµÄµØÖ·Ê±,¿ÉÒÔÓÃip(10.0.2.2)À´Ìæ»»
+					// æœ¬æœºåœ°å€ç”¨localhost, ä½†æ˜¯å¦‚æœç”¨æ¨¡æ‹Ÿå™¨åŠ è½½æœ¬æœºçš„åœ°å€æ—¶,å¯ä»¥ç”¨ip(10.0.2.2)æ¥æ›¿æ¢
 					URL url = new URL("http://10.0.2.2:8080/360/update.json");
 					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");// ÉèÖÃÇëÇó·½·¨
-					conn.setConnectTimeout(5000);// ÉèÖÃÁ¬½Ó³¬Ê±
-					conn.setReadTimeout(5000);// ÉèÖÃÏìÓ¦³¬Ê±, Á¬½ÓÉÏÁË,µ«·şÎñÆ÷³Ù³Ù²»¸øÏìÓ¦
-					conn.connect();// Á¬½Ó·şÎñÆ÷
+					conn.setRequestMethod("GET");// è®¾ç½®è¯·æ±‚æ–¹æ³•
+					conn.setConnectTimeout(5000);// è®¾ç½®è¿æ¥è¶…æ—¶
+					conn.setReadTimeout(5000);// è®¾ç½®å“åº”è¶…æ—¶, è¿æ¥ä¸Šäº†,ä½†æœåŠ¡å™¨è¿Ÿè¿Ÿä¸ç»™å“åº”
+					conn.connect();// è¿æ¥æœåŠ¡å™¨
 
-					int responseCode = conn.getResponseCode();// »ñÈ¡ÏìÓ¦Âë
+					int responseCode = conn.getResponseCode();// è·å–å“åº”ç 
 					if (responseCode == 200) {
 						InputStream inputStream = conn.getInputStream();
 						String result = StringUtils.input2String(inputStream);
-						// System.out.println("ÍøÂç·µ»Ø:" + result);
+						// System.out.println("ç½‘ç»œè¿”å›:" + result);
 
-						// ½âÎöjson
+						// è§£æjson
 						JSONObject jo = new JSONObject(result);
 						mVersionName = jo.getString("versionName");
 						mVersionCode = jo.getInt("versionCode");
 						mdescription = jo.getString("description");
 						mDownloadUrl = jo.getString("downloadUrl");
-						// System.out.println("°æ±¾ÃèÊö:" + mDesc);
+						// System.out.println("ç‰ˆæœ¬æè¿°:" + mDesc);
 
-						if (mVersionCode > getVersionCode()) {// ÅĞ¶ÏÊÇ·ñÓĞ¸üĞÂ
-							// ·şÎñÆ÷µÄVersionCode´óÓÚ±¾µØµÄVersionCode
-							// ËµÃ÷ÓĞ¸üĞÂ, µ¯³öÉı¼¶¶Ô»°¿ò
+						if (mVersionCode > getVersionCode()) {// åˆ¤æ–­æ˜¯å¦æœ‰æ›´æ–°
+							// æœåŠ¡å™¨çš„VersionCodeå¤§äºæœ¬åœ°çš„VersionCode
+							// è¯´æ˜æœ‰æ›´æ–°, å¼¹å‡ºå‡çº§å¯¹è¯æ¡†
 							msg.what = NEW_VERSION_UPDATE;
 						} else {
-							// Ã»ÓĞ°æ±¾¸üĞÂ
+							// æ²¡æœ‰ç‰ˆæœ¬æ›´æ–°
 							msg.what = NO_NEW_VERSION;
 						}
 					}
 				} catch (MalformedURLException e) {
-					// url´íÎóµÄÒì³£
+					// urlé”™è¯¯çš„å¼‚å¸¸
 					msg.what = CODE_URL_ERROR;
 					e.printStackTrace();
 				} catch (IOException e) {
-					// ÍøÂç´íÎóÒì³£
+					// ç½‘ç»œé”™è¯¯å¼‚å¸¸
 					msg.what = CODE_NET_ERROR;
 					e.printStackTrace();
 				} catch (JSONException e) {
-					// json½âÎöÊ§°Ü
+					// jsonè§£æå¤±è´¥
 					msg.what = CODE_JSON_ERROR;
 					e.printStackTrace();
 				} finally {
 					long endTime = System.currentTimeMillis();
-					long timeUsed = endTime - startTime;// ·ÃÎÊÍøÂç»¨·ÑµÄÊ±¼ä
+					long timeUsed = endTime - startTime;// è®¿é—®ç½‘ç»œèŠ±è´¹çš„æ—¶é—´
 					if (timeUsed < 2000) {
-						// Ç¿ÖÆĞİÃßÒ»¶ÎÊ±¼ä,±£Ö¤ÉÁÆÁÒ³Õ¹Ê¾2ÃëÖÓ
+						// å¼ºåˆ¶ä¼‘çœ ä¸€æ®µæ—¶é—´,ä¿è¯é—ªå±é¡µå±•ç¤º2ç§’é’Ÿ
 						try {
 							Thread.sleep(2000 - timeUsed);
 						} catch (InterruptedException e) {
@@ -170,7 +187,7 @@ public class SplashActivity extends Activity {
 
 					mHandler.sendMessage(msg);
 					if (conn != null) {
-						conn.disconnect();// ¹Ø±ÕÍøÂçÁ¬½Ó
+						conn.disconnect();// å…³é—­ç½‘ç»œè¿æ¥
 					}
 				}
 			}
@@ -178,25 +195,25 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * Èç¹ûÓĞĞÂ°æ±¾,µ¯³öÌáÊ¾¿ò,ÌáÊ¾ÓÃ»§¸üĞÂ
+	 * å¦‚æœæœ‰æ–°ç‰ˆæœ¬,å¼¹å‡ºæç¤ºæ¡†,æç¤ºç”¨æˆ·æ›´æ–°
 	 */
 	private void alertUpdate() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("ÓĞĞÂ°æ±¾À²!!!");
+		builder.setTitle("æœ‰æ–°ç‰ˆæœ¬å•¦!!!");
 		builder.setMessage(mdescription);
-		builder.setPositiveButton("ÏÖÔÚÉı¼¶", new OnClickListener() {
+		builder.setPositiveButton("ç°åœ¨å‡çº§", new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub Éı¼¶
+				// TODO Auto-generated method stub å‡çº§
 				downloadNewVersion();
 			}
 		});
-		builder.setNegativeButton("ÒÔºóÔÙËµ", new OnClickListener() {
+		builder.setNegativeButton("ä»¥åå†è¯´", new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub ²»Éı¼¶
+				// TODO Auto-generated method stub ä¸å‡çº§
 				goHome();
 			}
 		});
@@ -204,7 +221,7 @@ public class SplashActivity extends Activity {
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				// TODO Auto-generated method stub °´È¡Ïû¼ü
+				// TODO Auto-generated method stub æŒ‰å–æ¶ˆé”®
 				goHome();
 			}
 		});
@@ -212,11 +229,11 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * ÏÂÔØĞÂ°æ±¾µÄ°²×°°ümobile360_3.apk "http://10.0.2.2:8080/360/mobile360_3.apk"
+	 * ä¸‹è½½æ–°ç‰ˆæœ¬çš„å®‰è£…åŒ…mobile360_3.apk "http://10.0.2.2:8080/360/mobile360_3.apk"
 	 */
 	protected void downloadNewVersion() {
 
-		//ÅĞ¶ÏsdcardÊÇ·ñÕı³£
+		//åˆ¤æ–­sdcardæ˜¯å¦æ­£å¸¸
 		if (Environment.getExternalStorageState().equals(
 				Environment.MEDIA_MOUNTED)) {
 			HttpUtils http = new HttpUtils();
@@ -229,32 +246,32 @@ public class SplashActivity extends Activity {
 						boolean isUploading) {
 					super.onLoading(total, current, isUploading);
 					tv_progress.setVisibility(View.VISIBLE);
-					tv_progress.setText("ÏÂÔØ½ø¶È : " + (current * 100) / total);
+					tv_progress.setText("ä¸‹è½½è¿›åº¦ : " + (current * 100) / total);
 				}
 
 				@Override
 				public void onFailure(HttpException arg0, String arg1) {
-					AlertUser("ÏÂÔØÊ§°Ü");
+					AlertUser("ä¸‹è½½å¤±è´¥");
 					goHome();
 				}
 
 				@Override
 				public void onSuccess(ResponseInfo<File> arg0) {
-					AlertUser("ÏÂÔØ³É¹¦" + target);
+					AlertUser("ä¸‹è½½æˆåŠŸ" + target);
 					File file = arg0.result;
 					Uri uri = Uri.fromFile(file);
 					installApk(uri);
 				}
 			});
-			//ÌáÊ¾ÕÒ²»µ½sdcard
+			//æç¤ºæ‰¾ä¸åˆ°sdcard
 		} else {
-			AlertUser("Ã»ÓĞÕÒµ½sd¿¨");
+			AlertUser("æ²¡æœ‰æ‰¾åˆ°sdå¡");
 			goHome();
 		}
 	}
 
 	/**
-	 * Ìø×ª°²×°activity °²×°ĞÂ°æ±¾µÄapk
+	 * è·³è½¬å®‰è£…activity å®‰è£…æ–°ç‰ˆæœ¬çš„apk
 	 * 
 	 * @param uri
 	 */
@@ -268,7 +285,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * ³õÊ¼»¯¿Ø¼ş
+	 * åˆå§‹åŒ–æ§ä»¶
 	 */
 	public void initView() {
 		tv_versionName = (TextView) findViewById(R.id.tv_versionName);
@@ -276,7 +293,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * »ñÈ¡Èí¼şµ±Ç°µÄversionName
+	 * è·å–è½¯ä»¶å½“å‰çš„versionName
 	 * 
 	 * @return
 	 */
@@ -295,7 +312,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * »ñÈ¡Èí¼şµ±Ç°µÄversionCode
+	 * è·å–è½¯ä»¶å½“å‰çš„versionCode
 	 * 
 	 * @return
 	 */
@@ -314,7 +331,7 @@ public class SplashActivity extends Activity {
 	}
 
 	/**
-	 * ÌáÊ¾ÓÃ»§
+	 * æç¤ºç”¨æˆ·
 	 * 
 	 * @param text
 	 */
@@ -335,3 +352,4 @@ public class SplashActivity extends Activity {
 		finish();
 	}
 }
+

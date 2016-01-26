@@ -17,4 +17,29 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <style name="TitleStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:textSize">28dp</item>
+        <item name="android:textColor">@android:color/black</item> 
+        <item name="android:gravity">center</item> 
+        <item name="android:background">#AEFF76</item> 
+    </style>
+    
+    <style name="Sub_Title_Style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:textColor">@android:color/black</item> 
+    </style>
+    
+        <style name="Description_Title_Style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textColor">#969496</item> 
+    </style>
+
 </resources>
